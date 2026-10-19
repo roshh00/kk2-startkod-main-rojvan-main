@@ -1,0 +1,3 @@
+10;Ost
+20;Kyckling
+30;Bacon
