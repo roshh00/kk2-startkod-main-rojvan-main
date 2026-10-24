@@ -1,63 +1,90 @@
-Den börjar ge mig felmeddelande om att index är utanför arrayen på två ställen. I ShoppingList och i Program. 
+Genomgång av felen och lösningarna
 
-Crashen börjar i ShoppingList på linje 90, där jag behövde lägga till en if-sats på raden. 
-Nu kan jag köra koden. 
+Här beskriver jag några problem jag stötte på, hur jag löste dem och varför
+jag valde de lösningarna.
 
-Den ger mig prisen som är skriven på items.txt och en total summa på 121kr
-Började med att lägga till en vara och gav den namnet mjölk med priset 15kr. 
-Nu är listan sparad med en beskriving av mjölk på 15kr. 
-Har lagt till tre varor i menyn med namn och pris men extra siffrorna är fortfarande med när jag kör koden. 
+Klassdiagram:
 
-Jag tog bort sifforna i txt filen och behöll dem nya, men nu visar det inte namnet på dem utan bara det nya priset. 
-Ändrade i txt filen och gav namn till mjölk, bröd och ost. 
+https://mermaid.ai/app/projects/ad7c1891-c192-4702-9056-566f9173add5/diagrams/25257707-967a-45c8-a0f8-270d3b9e5a4f/share/invite/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkb2N1bWVudElEIjoiMjUyNTc3MDctOTY3YS00NWM4LWEwZjgtMjcwZDNiOWU1YTRmIiwiYWNjZXNzIjoiRWRpdCIsInB1cnBvc2UiOiJzaGFyZS1pbnZpdGUiLCJpYXQiOjE3OTI4NDE3NzUsImV4cCI6MTc5NTQzMzc3NX0.aIMUDpCXWnQfN1uG4eB2PXxVE_iB_GqLLo2Qa3sv7Wg?entryPoint=share-modal
 
-Men nu visar den bara Ost och hur mycket den kostar. 
-Frågade Chatbotten i Vs Code och den gav mig att jag skulle ersätta två rader i ShoppingList
-Ändrade till String Lines = File.ReadAllLines(path); istället för string text (ReadAllText);
+## Raderna i items.txt
 
-Koden visar beskrivingen på alla tre varor med text och pris. 
-nu visar total summan fel pris. 
+Varje rad i items.txt ska innehålla ett pris och ett namn med semikolon
+emellan. När jag läste in filen fick jag problem om en rad saknade namn
+eller inte hade rätt format. Då kunde programmet försöka läsa en del som
+inte fanns, till exempel parts[1]. Nu kontrollerar Load raden först och
+hoppar över rader som inte går att använda.
 
-Jag ser att i ShoppingList på rad 28 så är den står for int (1) då den börjar räkna från index 1. 
-Vilket gjorde så den hoppade över första raden. 
-Ändrar koden till for int (0) istället för den kan börja räkna från första raden. 
+## Läsa filen rad för rad
 
-Nu när koden körs så visar den rätt total summa. 
+Filen har en vara per rad, så jag använder File.ReadAllLines för att läsa
+in den som en samling rader. Då kan programmet dela upp och kontrollera
+varje vara för sig. När jag tidigare behandlade filen som en enda text blev
+det svårt att få ut rätt pris och namn.
 
-Provade med att lägga till en ny vara
-Den la till varan i txt filen och kan köras som vanligt.
+## Totalsumman och numreringen
 
+Listans index börjar på 0. När summeringen började på fel index kom inte
+alla varor med i summan. Jag ändrade så att den börjar från index 0.
+Numren som visas i menyn börjar däremot på 1, eftersom det blir enklare
+för användaren. Vid borttagning måste menyvalet därför göras om till ett
+index genom att dra bort 1.
 
-La till catch på ShoppingList på rad 74 med FileNotFoundExecption. 
-Programmet crashade när jag skrev in ett ogiltigt tecken. Ändrade i program.cs filen
-Jag la till tryParse vid inmatning av ogiltigt tecken och nu får man upp felmeddelanden. 
+## När inmatningen inte är ett heltal
 
+ReadInt använder int.TryParse för att kontrollera inmatningen. Om jag
+skriver text i stället för ett heltal får jag ett felmeddelande och kan
+försöka igen. 
+TryParse säger också nej till tal som är för stora för typen
+int.
 
-Provade att starta programmet utan items.txt men den kraschade. 
-La till på ShoppingList på rad 86 att programmet kan köras utan items.txt fil
-Men den skapar en ny items.txt fil när jag väljer att spara mina varor på menyn. 
+## Om filen saknas eller innehåller fel
 
+Om items.txt saknas avslutar Load utan att försöka läsa den. Om filen finns
+men någon rad är felaktig hoppas den raden över. På så sätt kan programmet
+starta även om filen inte finns och en felaktig rad stoppar inte
+inläsningen av resten.
 
-Jag la till på ShoppingList på rad 73 att listan blir bara sparad om man skriver in rätt
-Om ett fel inträffar så visar den ett felmeddelande på att listan kunde inte sparas. 
+## Om det inte går att spara
 
+Save fångar fel som kan uppstå när filen skrivs, till exempel om programmet
+inte har rättighet att skriva till platsen. Då visas ett felmeddelande i
+stället för att programmet kraschar utan förklaring.
 
+## Namn och pris
 
+Ett namn får inte vara tomt eller bara innehålla mellanslag.
+Om namnet inte godkänns visar programmet felet och frågar efter ett nytt namn. 
+Priset får inte heller vara negativt. Item stoppar det med ArgumentOutOfRangeException,
+som fångas i Program så att användaren kan skriva in ett nytt pris.
 
-2. Nu när alla sex fel är lösta ska jag påbörja andra delen. 
+## Budgeten och valet av undantag
 
-Började med att kasta in argument execption med ett felmeddelande i items.cs på rad 14
-När man skrev in en tom rad / bara mellanslag. 
+ShoppingList.Add kontrollerar om den nya varan skulle göra att totalsumman
+blir högre än budgeten. Om det händer läggs varan inte till, utan metoden
+kastar InvalidOperationException. Program fångar undantaget och visar
+meddelandet för användaren.
 
-Har lagt till ArgumentOutOfRangeExecption i både items.cs och program.cs
-När man skriver in ett negativt värde så får vi upp ett felmeddelande
+Jag valde ett undantag eftersom Add då kan förklara varför den inte kunde
+lägga till varan.
+Den som anropar metoden hade sedan behövt ordna felmeddelandet separat. 
+Ett undantag är alltså ett val för hur felet ska skickas vidare.
+I programmet fångas det direkt där meddelandet visas.
 
-När jag har lagt till ett budgettak så valde jag att lägga till i ShoppingList.cs och i Program.cs
-Jag började med i ShoppingList att lägga till en readonly int (budget) i public stringen
-Därefter i public void kan dem integrera med varandra om priset överstiger budgettaket. 
+## Val utanför menyn
 
-I Program.cs la jag til en ytterligare catch för att förhindra programmet till att krascha. 
+ReadInt kontrollerar att inmatningen är ett heltal, men inte att det är ett
+menyalternativ. Därför har menyn också en kontroll som visar ett
+felmeddelande om talet inte är mellan 1 och 5. Då får användaren veta att
+valet inte finns.
 
+## Nummer som inte finns vid borttagning
 
+RemoveAt kontrollerar att numret är mellan 1 och antalet varor. Om numret
+inte stämmer kastas ArgumentOutOfRangeException, som fångas i Program.
+Användaren får då veta att det inte finns någon vara med det numret.
 
-Klassdiagram länk: https://mermaid.ai/app/projects/ad7c1891-c192-4702-9056-566f9173add5/diagrams/fe57b138-43b6-49d7-8103-fc1d804f31a1/version/v0.1/edit
+Jag hade också råkat anropa RemoveAt två gånger för samma nummer. Det
+andra anropet låg utanför try/catch och kunde därför krascha programmet
+även om det första anropets fel redan hade fångats. Jag tog bort det extra
+anropet så att borttagningen bara görs en gång.

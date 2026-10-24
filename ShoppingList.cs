@@ -44,7 +44,7 @@ public void RemoveAt(int number)
     items.RemoveAt(number - 1);
 }
 
-    // Adds up the price of every item on the list.
+    // Summerar alla priser i listan och returnerar summan.
     public int Total()
     {
         int sum = 0;
@@ -57,7 +57,7 @@ public void RemoveAt(int number)
         return sum;
     }
 
-    // Looks up an item by its name. Returns null if there is no such item.
+    // Kollar upp om en vara finns i listan och returnerar den om den finns, annars null
     public Item Find(string name)
     {
         foreach (Item item in items)
@@ -81,7 +81,7 @@ public void RemoveAt(int number)
         Console.WriteLine($"Totalt: {Total()} kr");
     }
 
-    // Writes one item per line, as "price;name".
+    // Skriver ett pris och namn på varje item i listan till en fil.
     public void Save()
     {
         List<string> lines = new List<string>();
@@ -106,7 +106,7 @@ public void RemoveAt(int number)
         }
     }
 
-    // Reads the file back into the list.
+    // Läser tillbaka listan från filen och lägger till varje item i listan.
     public void Load()
     {
         // Sparar listan utan items.txt.
