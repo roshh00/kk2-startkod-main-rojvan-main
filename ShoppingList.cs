@@ -30,11 +30,19 @@ class ShoppingList
         items.Add(item);
     }
 
-    // Removes the item the user sees as number 1, 2, 3 ...
-    public void RemoveAt(int number)
+    // tar bort ett item från listan, men tar bort det som är på platsen number-1 i listan 
+public void RemoveAt(int number)
+{
+    if (number < 1 || number > items.Count)
     {
-        items.RemoveAt(number - 1);
+        throw new ArgumentOutOfRangeException(
+            nameof(number),
+            number,
+            "Numret finns inte i listan.");
     }
+
+    items.RemoveAt(number - 1);
+}
 
     // Adds up the price of every item on the list.
     public int Total()

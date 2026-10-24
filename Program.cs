@@ -40,10 +40,18 @@ while (true)
             // har lagt till en till catch för att den ska inte krascha när man överskrider budgeten.
         }
     }
+    
     else if (choice == 2)
     {
         int number = ReadInt("Nummer: ");
-        list.RemoveAt(number);
+        try 
+        {
+            list.RemoveAt(number);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Console.WriteLine("Det finns ingen vara med det numret");
+        }
     }
     else if (choice == 3)
     {
@@ -67,6 +75,10 @@ while (true)
     else if (choice == 5)
     {
         break;
+    }
+    else
+    {
+        Console.WriteLine("Ogiltigt val. Ange ett nummer mellan 1 och 5.");
     }
 }
 
